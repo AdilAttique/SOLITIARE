@@ -178,6 +178,8 @@ void Board::initliazePiles()
 				tempPosition.y += 42;
 			tempVector[j] = this->Deck.top();
 			tempVector[j]->setPosition(tempPosition);
+			if (j == i)
+				tempVector[j]->isFlipped = true;
 			this->Deck.pop();
 		}
 		MyStack tempMyStack(tempVector, 1, i, i + 1);
@@ -198,6 +200,10 @@ void Board::Play()
 	//sf::Sprite TEST(test);
 	//TEST.setScale(0.03, 0.03);
 	//TEST.setPosition(48, 15);
+	bool isSpriteSelected = false;;
+	bool deagCard = false;
+	float max_x = 500;
+	Card* currentCard = nullptr;
 	while (window->isOpen())
 	{
 		sf::Event evnt;
@@ -214,7 +220,56 @@ void Board::Play()
 				float ypos = sf::Mouse::getPosition(*window).y;
 				cout << "X: " << xpos << "  Y: " << ypos << endl;
 			}
+			
+			if (evnt.type == sf::Event::MouseButtonPressed)
+			{
+				if (evnt.mouseButton.button == sf::Mouse::Left)
+				{
+					for (int i = 0; i < 7; i++)
+					{
+						for (int j = 0; j < this->piles[i].size; j++)
+						{
+							// Check if the mouse click is inside the sprite
+							sf::Vector2i mousePosition = sf::Mouse::getPosition(*window);
+							if (this->piles[i].cards[j]->frontImage.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)))
+							{
+								currentCard = this->piles[i].cards[j];
+								isSpriteSelected = true;
+							}
+						}
+					}
+					
+					
+				}
+				else if (evnt.mouseButton.button == sf::Mouse::Right)
+				{
+					deagCard = true;
+				}
+			}
+			if (evnt.type == sf::Event::MouseButtonReleased)
+			{
+				if (evnt.mouseButton.button == sf::Mouse::Left)
+				{
+					isSpriteSelected = false;
+				}
+			}
 		}
+
+		if (isSpriteSelected && currentCard != nullptr)
+		{
+			sf::Vector2i mousePosition = sf::Mouse::getPosition(*window);
+			currentCard->frontImage.setPosition(static_cast<float>(mousePosition.x) - 50, static_cast<float>(mousePosition.y) - 65);
+			currentCard->backImage.setPosition(static_cast<float>(mousePosition.x) - 50, static_cast<float>(mousePosition.y) - 65);
+		}
+		if (deagCard)
+		{
+			sf::Vector2f position = currentCard->frontImage.getPosition();
+			position.x += 5;
+			currentCard->setPosition(position);
+			if (position.x >= max_x)
+				deagCard = false;
+		}
+
 		window->clear(sf::Color::Red);
 		
 		window->draw(this->backgroundImage);
@@ -223,10 +278,101 @@ void Board::Play()
 		{
 			for (int j = 0; j < this->piles[i].size; j++)
 			{
-				window->draw(this->piles[i].cards[j]->frontImage);
+				if(this->piles[i].cards[j]->isFlipped)
+					window->draw(this->piles[i].cards[j]->frontImage);
+				else
+					window->draw(this->piles[i].cards[j]->backImage);
 			}
 		}
 		//window->draw(TEST);
 		window->display();
 	}
 }
+
+
+
+//{
+
+	//sf::RenderWindow window(sf::VideoMode(1375, 696), " Tut SFML", sf::Style::Close | sf::Style::Resize);
+	//window.setPosition(Vector2i(-10, 0));
+	//Texture B;
+	//B.loadFromFile("Ace_spades.png");
+
+	//Sprite Card(B);
+	//Card.setPosition(100, 50);
+	//Texture C;
+
+	//Texture A;
+	//A.loadFromFile("background.jpg");
+
+	//Sprite Backg(A);
+	//Backg.setPosition(0, -80);
+	//Font Lato;
+	//Lato.loadFromFile("Lato.ttf");
+
+	//Text NG("NEW GAME", Lato, 50);
+	//NG.setPosition(540, 60);
+	//NG.setFillColor(sf::Color::White);
+	//Text LG("LOAD GAME", Lato, 50);
+	//LG.setPosition(535, 170);
+	//LG.setFillColor(sf::Color::White);
+//	bool isSpriteSelected = false;;
+//	bool deagCard = false;
+//	float max_x = 500;
+//	//--------------
+//	while (window.isOpen())
+//	{
+//		sf::Event evnt;
+//
+//		while (window.pollEvent(evnt))
+//		{
+//			if (evnt.type == sf::Event::Closed)
+//				window.close();
+//
+//			if (evnt.type == sf::Event::MouseButtonPressed)
+//			{
+//				if (evnt.mouseButton.button == sf::Mouse::Left)
+//				{
+//
+//					// Check if the mouse click is inside the sprite
+//					sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+//					if (Card.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)))
+//					{
+//						isSpriteSelected = true;
+//					}
+//				}
+//				else if (evnt.mouseButton.button == sf::Mouse::Right)
+//				{
+//					deagCard = true;
+//				}
+//			}
+//			if (evnt.type == sf::Event::MouseButtonReleased)
+//			{
+//				if (evnt.mouseButton.button == sf::Mouse::Left)
+//				{
+//					isSpriteSelected = false;
+//				}
+//			}
+//		}
+//
+//		if (isSpriteSelected)
+//		{
+//			sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+//			Card.setPosition(static_cast<float>(mousePosition.x) - 50, static_cast<float>(mousePosition.y) - 65);
+//		}
+//		if (deagCard)
+//		{
+//			sf::Vector2f position = Card.getPosition();
+//			position.x += 5;
+//			Card.setPosition(position);
+//			if (position.x >= max_x)
+//				deagCard = false;
+//		}
+//		window.clear();
+//		window.draw(Backg);
+//		window.draw(Card);
+//		window.display();
+//	}
+//
+//	return 0;
+//}
