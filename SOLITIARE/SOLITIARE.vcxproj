@@ -135,25 +135,17 @@
   <ItemGroup>
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="Card.cpp" />
-    <ClCompile Include="Club.cpp" />
-    <ClCompile Include="Diamond.cpp" />
-    <ClCompile Include="Heart.cpp" />
     <ClCompile Include="Home.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyStack.cpp" />
     <ClCompile Include="Solitare.cpp" />
-    <ClCompile Include="Spade.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
     <ClInclude Include="Card.h" />
-    <ClInclude Include="Club.h" />
-    <ClInclude Include="Diamond.h" />
-    <ClInclude Include="Heart.h" />
     <ClInclude Include="Home.h" />
     <ClInclude Include="MyStack.h" />
     <ClInclude Include="Solitare.h" />
-    <ClInclude Include="Spade.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

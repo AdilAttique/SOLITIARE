@@ -12,6 +12,24 @@ int main()
 	return 0;
 }
 
+
+//int main()
+//{
+//	for (int i = 0; i < 52; i++)
+//	{
+//		cout << i << endl;
+//		sf::Texture tex;
+//		tex.loadFromFile("1.png");
+//		sf::Texture bex;
+//		bex.loadFromFile("back.png");
+//		sf::Sprite Imex;
+//		Imex.setTexture(tex);
+//		sf::Sprite Bmex;
+//		Bmex.setTexture(bex);
+//	}
+//}
+// 
+// 
 //int main() 
 //{
 //

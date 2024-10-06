@@ -27,18 +27,6 @@
     <ClCompile Include="Solitare.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Heart.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Club.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Spade.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Diamond.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -54,18 +42,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Board.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Club.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Diamond.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Heart.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Spade.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Solitare.h">

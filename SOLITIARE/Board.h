@@ -3,11 +3,8 @@
 #include <vector>
 #include "MyStack.h"
 #include <stack>
+#include <deque>
 #include "Card.h"
-#include "Club.h"
-#include "Spade.h"
-#include "Heart.h"
-#include "Diamond.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 using namespace std;
@@ -16,12 +13,14 @@ class Board
 {
 	sf::Texture background;
 	vector<MyStack> piles;
-	vector<stack<Card*>> foundation;
-	stack<Card*> Deck;
+	vector<stack<Card>> foundation;
+	stack<Card> Deck;
+	deque<Card> withdrawnDeck;
 	sf::RenderWindow* window;
 	sf::Sprite backgroundImage;
+	string mode = "Easy";
 
-	void shuffle(Card* Array[]);
+	void shuffle(vector<Card>& Array);
 
 public:
 	Board();
@@ -29,6 +28,7 @@ public:
 	void intiliazeDeck();
 	void initliazePiles();
 	void initializeFoundations();
+	bool canPlaceCard(Card* currentCard, Card* targetCard);
 	void Play();
 
 };

@@ -5,11 +5,10 @@
 class MyStack
 {
 public:
-	vector<Card*> cards;
-	int visible;
-	int notVisible;
-	int size;
+	vector<Card> cards;
+	int myPile;
+	sf::Vector2f position;
 
-	MyStack(vector<Card*> Cards, int vis, int notVis, int size);
+	MyStack(vector<Card>& Cards, int MyPile ,sf::Vector2f position);
 };
 
