@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "MyStack.h"
+#include "Foundation.h"
 #include <stack>
 #include <deque>
 #include "Card.h"
@@ -13,7 +14,7 @@ class Board
 {
 	sf::Texture background;
 	vector<MyStack> piles;
-	vector<stack<Card>> foundation;
+	Foundation Home;
 	stack<Card> Deck;
 	deque<Card> withdrawnDeck;
 	sf::RenderWindow* window;

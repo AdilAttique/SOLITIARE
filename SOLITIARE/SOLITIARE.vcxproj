@@ -135,7 +135,7 @@
   <ItemGroup>
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="Card.cpp" />
-    <ClCompile Include="Home.cpp" />
+    <ClCompile Include="Foundation.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyStack.cpp" />
     <ClCompile Include="Solitare.cpp" />
@@ -143,7 +143,7 @@
   <ItemGroup>
     <ClInclude Include="Board.h" />
     <ClInclude Include="Card.h" />
-    <ClInclude Include="Home.h" />
+    <ClInclude Include="Foundation.h" />
     <ClInclude Include="MyStack.h" />
     <ClInclude Include="Solitare.h" />
   </ItemGroup>
