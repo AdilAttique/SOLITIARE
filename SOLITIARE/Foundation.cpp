@@ -26,7 +26,7 @@ int Foundation::insertionIndex(Card* currentCard)
 bool Foundation::canInsert(Card* currentCard ,int index)
 {
 	if (this->foundationPiles[index].empty())
-		if (currentCard->rank = 1)
+		if (currentCard->rank == 1)
 			return true;
 		else
 			return false;
@@ -39,6 +39,14 @@ bool Foundation::canInsert(Card* currentCard ,int index)
 
 void Foundation::insert(Card* currentCard, int index)
 {
+	if (index == 0)
+		currentCard->setPosition(48,1);
+	else if(index == 1)
+		currentCard->setPosition(205, 1);
+	else if (index == 2)
+		currentCard->setPosition(363, 1);
+	else if (index == 3)
+		currentCard->setPosition(522, 1);
 	this->foundationPiles[index].push(*currentCard);
 }
 
@@ -47,6 +55,8 @@ bool Foundation::checkIfComplete()
 {
 	for (int i = 0; i < 4; i++)
 	{
+		if (this->foundationPiles[i].empty())
+			return false;
 		if (this->foundationPiles[i].top().rank != 13)
 			return false;
 	}

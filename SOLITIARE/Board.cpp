@@ -74,6 +74,9 @@ void Board::intiliazeDeck()
 	}
 
 	this->shuffle(temp);
+	this->shuffle(temp);
+	this->shuffle(temp);
+	this->shuffle(temp);
 
 	// 
 	/*for (int i = 0; i < 52; i++)
@@ -218,13 +221,53 @@ bool Board::canPlaceCard(Card* currentCard, Card* targetCard)
 	return differentColors && correctRank;
 }
 
+
+
+void Board::addToPile(Card* currentCard, Card* tempCard, vector<Card*>& selectedCards, int sourcePileIndex, int index, bool & isPositionChanged)
+{
+	if (this->piles[index].cards.empty())
+		tempCard = nullptr;
+	else
+		tempCard = &this->piles[index].cards.back();
+	if (canPlaceCard(currentCard, tempCard))
+	{
+		sf::Vector2f tempPosition = this->piles[index].position;
+		for (int i = 0; i < this->piles[index].cards.size(); i++)
+		{
+			tempPosition.y += 42;
+		}
+		currentCard->setPosition(tempPosition);
+
+		isPositionChanged = true;
+
+		for (int i = 0; i < selectedCards.size(); i++)
+		{
+			selectedCards[i]->setPosition(tempPosition.x, tempPosition.y + (i * 42));  // Adjust spacing
+			this->piles[index].cards.push_back(*selectedCards[i]);
+		}
+
+		// Remove the moved cards from the source 
+		if (sourcePileIndex >= 0)
+			this->piles[sourcePileIndex].cards.erase(
+				this->piles[sourcePileIndex].cards.end() - selectedCards.size(),
+				this->piles[sourcePileIndex].cards.end()
+			);
+		else if (sourcePileIndex == -2)
+			withdrawnDeck.pop_back();
+		else if (sourcePileIndex == -3)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				if (!this->Home.foundationPiles[i].empty())
+					if (this->Home.foundationPiles[i].top().suit == selectedCards[i]->suit)
+						this->Home.foundationPiles[i].pop();
+			}
+		}
+	}
+}
+
 void Board::Play()
 {
-	//sf::Texture test;
-	//test.loadFromFile("1.png");
-	//sf::Sprite TEST(test);
-	//TEST.setScale(0.03, 0.03);
-	//TEST.setPosition(48, 15);
 	bool isSpriteSelected = false;;
 	bool deagCard = false;
 	float max_x = 500;
@@ -282,18 +325,40 @@ void Board::Play()
 
 						}
 					}
+					for (int i = 0; i < 4; i++)
+					{
+						if (!this->Home.foundationPiles[i].empty())
+						{
+							if (this->Home.foundationPiles[i].top().frontImage.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)))
+							{
+								currentCard = &this->Home.foundationPiles[i].top();
+								originalPosition = this->Home.foundationPiles[i].top().position;
+								isSpriteSelected = true;
+								sourcePileIndex = -3;
+
+								selectedCards.clear();
+								originalPositions.clear();
+								originalPositions.push_back(this->Home.foundationPiles[i].top().position);
+								selectedCards.push_back(currentCard);
+							}
+						}
+					}
 					if (!this->Deck.empty())
 					{
 						if (this->Deck.top().backImage.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)))
 						{
-							cout << "i am in the if statement" << endl;
 							if (mode == "Easy")
 							{
 								this->Deck.top().isFlipped = true;
 								this->withdrawnDeck.push_back(this->Deck.top());
 								for (int z = withdrawnDeck.size() - 1, count = 1; z >= 0; z--, count++)
 								{
-									this->withdrawnDeck[z].setPosition(this->Deck.top().position.x - (count * 100), this->Deck.top().position.y);
+									if (count == 1)
+										this->withdrawnDeck[z].setPosition(this->Deck.top().position.x - (count * 100), this->Deck.top().position.y);
+									else if (count == 2)
+										this->withdrawnDeck[z].setPosition(this->Deck.top().position.x - (count * 70), this->Deck.top().position.y);
+									else if (count == 3)
+										this->withdrawnDeck[z].setPosition(this->Deck.top().position.x - (count * 60), this->Deck.top().position.y);
 									if (count == 3)
 										break;
 								}
@@ -309,7 +374,12 @@ void Board::Play()
 									this->withdrawnDeck.push_back(this->Deck.top());
 								for (int z = withdrawnDeck.size() - 1, count = 1; z >= 0; z--, count++)
 								{
-									this->withdrawnDeck[z].setPosition(this->Deck.top().position.x - (count * 100), this->Deck.top().position.y);
+									if (count == 1)
+										this->withdrawnDeck[z].setPosition(this->Deck.top().position.x - (count * 100), this->Deck.top().position.y);
+									else if (count == 2)
+										this->withdrawnDeck[z].setPosition(this->Deck.top().position.x - (count * 70), this->Deck.top().position.y);
+									else if (count == 3)
+										this->withdrawnDeck[z].setPosition(this->Deck.top().position.x - (count * 60), this->Deck.top().position.y);
 									if (count == 3)
 										break;
 								}
@@ -331,6 +401,7 @@ void Board::Play()
 							}
 						}
 					}
+					
 
 					if (!this->withdrawnDeck.empty())
 					{
@@ -366,244 +437,40 @@ void Board::Play()
 						
 						if ((static_cast<float>(mousePosition.x) > 48 && static_cast<float>(mousePosition.x) < 134) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{	
-							if (this->piles[0].cards.empty())
-								tempCard = nullptr;
-							else
-								tempCard = &this->piles[0].cards.back();
-							if (canPlaceCard(currentCard, tempCard))
-							{
-								sf::Vector2f tempPosition = this->piles[0].position;
-								for (int i = 0; i < this->piles[0].cards.size(); i++)
-								{
-									tempPosition.y += 42;
-								}
-								currentCard->setPosition(tempPosition);
-
-								isPositionChanged = true;
-								/*this->piles[0].cards.push_back(*currentCard);
-								this->piles[sourcePileIndex].cards.pop_back();*/
-
-								for (int i = 0; i < selectedCards.size(); i++)
-								{
-									selectedCards[i]->setPosition(tempPosition.x, tempPosition.y + (i * 42));  // Adjust spacing
-									this->piles[0].cards.push_back(*selectedCards[i]);
-								}
-
-								// Remove the moved cards from the source 
-								if(sourcePileIndex >= 0)
-								this->piles[sourcePileIndex].cards.erase(
-									this->piles[sourcePileIndex].cards.end() - selectedCards.size(),
-									this->piles[sourcePileIndex].cards.end()
-								);
-								else if (sourcePileIndex == -2)
-									withdrawnDeck.pop_back();
-							}
-
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 0, isPositionChanged);
 						}
-
 						else if ((static_cast<float>(mousePosition.x) > 205 && static_cast<float>(mousePosition.x) < 295) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{
-							if (this->piles[1].cards.empty())
-								tempCard = nullptr;
-							else
-								tempCard = &this->piles[1].cards.back();
-							if (canPlaceCard(currentCard, tempCard))
-							{
-								sf::Vector2f tempPosition = this->piles[1].position;
-								for (int i = 0; i < this->piles[1].cards.size(); i++)
-								{
-									tempPosition.y += 42;
-								}
-								currentCard->setPosition(tempPosition);
-
-								isPositionChanged = true;
-								//this->piles[1].cards.push_back(*currentCard);
-								//this->piles[sourcePileIndex].cards.pop_back();
-
-								for (int i = 0; i < selectedCards.size(); i++)
-								{
-									selectedCards[i]->setPosition(tempPosition.x, tempPosition.y + (i * 42));  // Adjust spacing
-									this->piles[1].cards.push_back(*selectedCards[i]);
-								}
-
-								// Remove the moved cards from the source pile
-								if (sourcePileIndex >= 0)
-								this->piles[sourcePileIndex].cards.erase(
-									this->piles[sourcePileIndex].cards.end() - selectedCards.size(),
-									this->piles[sourcePileIndex].cards.end()
-								);
-								else if (sourcePileIndex == -2)
-									withdrawnDeck.pop_back();
-							}
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 1, isPositionChanged);
 						}
 						else if ((static_cast<float>(mousePosition.x) > 360 && static_cast<float>(mousePosition.x) < 450) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{
-							if (this->piles[2].cards.empty())
-								tempCard = nullptr;
-							else
-								tempCard = &this->piles[2].cards.back();
-								
-							if (canPlaceCard(currentCard, tempCard))
-							{
-								sf::Vector2f tempPosition = this->piles[2].position;
-								for (int i = 0; i < this->piles[2].cards.size(); i++)
-								{
-									tempPosition.y += 42;
-								}
-								currentCard->setPosition(tempPosition);
-
-								isPositionChanged = true;
-								//this->piles[2].cards.push_back(*currentCard);
-								//this->piles[sourcePileIndex].cards.pop_back();
-
-								for (int i = 0; i < selectedCards.size(); i++)
-								{
-									selectedCards[i]->setPosition(tempPosition.x, tempPosition.y + (i * 42));  // Adjust spacing
-									this->piles[2].cards.push_back(*selectedCards[i]);
-								}
-
-								// Remove the moved cards from the source pile
-								if (sourcePileIndex >= 0)
-								this->piles[sourcePileIndex].cards.erase(
-									this->piles[sourcePileIndex].cards.end() - selectedCards.size(),
-									this->piles[sourcePileIndex].cards.end()
-								);
-								else if (sourcePileIndex == -2)
-									withdrawnDeck.pop_back();
-							}
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 2, isPositionChanged);
 						}
 						else if ((static_cast<float>(mousePosition.x) > 520 && static_cast<float>(mousePosition.x) < 605) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{
-							if (this->piles[3].cards.empty())
-								tempCard = nullptr;
-							else
-								tempCard = &this->piles[3].cards.back();
-							if (canPlaceCard(currentCard, tempCard))
-							{
-								
-								sf::Vector2f tempPosition = this->piles[3].position;
-								for (int i = 0; i < this->piles[3].cards.size(); i++)
-								{
-									tempPosition.y += 42;
-								}
-								currentCard->setPosition(tempPosition);
-
-								isPositionChanged = true;
-								//this->piles[3].cards.push_back(*currentCard);
-								//this->piles[sourcePileIndex].cards.pop_back();
-
-								for (int i = 0; i < selectedCards.size(); i++)
-								{
-									selectedCards[i]->setPosition(tempPosition.x, tempPosition.y + (i * 42));  // Adjust spacing
-									this->piles[3].cards.push_back(*selectedCards[i]);
-								}
-
-								// Remove the moved cards from the source pile
-								if (sourcePileIndex >= 0)
-								this->piles[sourcePileIndex].cards.erase(
-									this->piles[sourcePileIndex].cards.end() - selectedCards.size(),
-									this->piles[sourcePileIndex].cards.end()
-								);
-								else if (sourcePileIndex == -2)
-									withdrawnDeck.pop_back();
-							}
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 3, isPositionChanged);
 						}
 						else if ((static_cast<float>(mousePosition.x) > 680 && static_cast<float>(mousePosition.x) < 765) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{
-							if (this->piles[4].cards.empty())
-								tempCard = nullptr;
-							else
-								tempCard = &this->piles[4].cards.back();
-							if (canPlaceCard(currentCard, tempCard))
-							{
-								sf::Vector2f tempPosition = this->piles[4].position;
-								for (int i = 0; i < this->piles[4].cards.size(); i++)
-								{
-									tempPosition.y += 42;
-								}
-								currentCard->setPosition(tempPosition);
- 
-								isPositionChanged = true;
-								//this->piles[4].cards.push_back(*currentCard);
-								//this->piles[sourcePileIndex].cards.pop_back();
-
-								for (int i = 0; i < selectedCards.size(); i++)
-								{
-									selectedCards[i]->setPosition(tempPosition.x, tempPosition.y + (i * 42));  // Adjust spacing
-									this->piles[4].cards.push_back(*selectedCards[i]);
-								}
-
-								// Remove the moved cards from the source pile
-								if (sourcePileIndex >= 0)
-								this->piles[sourcePileIndex].cards.erase(
-									this->piles[sourcePileIndex].cards.end() - selectedCards.size(),
-									this->piles[sourcePileIndex].cards.end()
-								);
-								else if (sourcePileIndex == -2)
-									withdrawnDeck.pop_back();
-							}
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 4, isPositionChanged);
 						}
 						else if ((static_cast<float>(mousePosition.x) > 840 && static_cast<float>(mousePosition.x) < 925) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{
-							if (this->piles[5].cards.empty())
-								tempCard = nullptr;
-							else
-								tempCard = &this->piles[5].cards.back();
-							if (canPlaceCard(currentCard, tempCard))
-							{
-								sf::Vector2f tempPosition = this->piles[5].position;
-								for (int i = 0; i < this->piles[5].cards.size(); i++)
-								{
-									tempPosition.y += 42;
-								}
-								currentCard->setPosition(tempPosition);
-
-								isPositionChanged = true;
-								//this->piles[5].cards.push_back(*currentCard);
-								//this->piles[sourcePileIndex].cards.pop_back();
-
-								for (int i = 0; i < selectedCards.size(); i++)
-								{
-									selectedCards[i]->setPosition(tempPosition.x, tempPosition.y + (i * 42));  // Adjust spacing
-									this->piles[5].cards.push_back(*selectedCards[i]);
-								}
-
-								// Remove the moved cards from the source pile
-								if (sourcePileIndex >= 0)
-								this->piles[sourcePileIndex].cards.erase(
-									this->piles[sourcePileIndex].cards.end() - selectedCards.size(),
-									this->piles[sourcePileIndex].cards.end()
-								);
-								else if (sourcePileIndex == -2)
-									withdrawnDeck.pop_back();
-							}
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 5, isPositionChanged);
 						}
 						else if ((static_cast<float>(mousePosition.x) > 1000 && static_cast<float>(mousePosition.x) < 1090) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{
-							if (this->piles[6].cards.empty())
-								tempCard = nullptr;
-							else
-								tempCard = &this->piles[6].cards.back();
-							if (canPlaceCard(currentCard, tempCard))
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 6, isPositionChanged);
+						}
+						else if ((static_cast<float>(mousePosition.x) > 45 && static_cast<float>(mousePosition.x) < 610) && (static_cast<float>(mousePosition.y) > 1 && static_cast<float>(mousePosition.y) < 120) && selectedCards.size() == 1)
+						{
+							int insertionIndex = this->Home.insertionIndex(selectedCards[0]);
+							if (this->Home.canInsert(selectedCards[0], insertionIndex))
 							{
-
-								sf::Vector2f tempPosition = this->piles[6].position;
-								for (int i = 0; i < this->piles[6].cards.size(); i++)
-								{
-									tempPosition.y += 42;
-								}
-								currentCard->setPosition(tempPosition);
-
+								this->Home.insert(selectedCards[0], insertionIndex);
 								isPositionChanged = true;
-								//this->piles[6].cards.push_back(*currentCard);
-								//this->piles[sourcePileIndex].cards.pop_back();
-								for (int i = 0; i < selectedCards.size(); i++)
-								{
-									selectedCards[i]->setPosition(tempPosition.x, tempPosition.y + (i * 42));  // Adjust spacing
-									this->piles[6].cards.push_back(*selectedCards[i]);
-								}
 
-								// Remove the moved cards from the source pile
 								if (sourcePileIndex >= 0)
 									this->piles[sourcePileIndex].cards.erase(
 										this->piles[sourcePileIndex].cards.end() - selectedCards.size(),
@@ -611,12 +478,16 @@ void Board::Play()
 									);
 								else if (sourcePileIndex == -2)
 									withdrawnDeck.pop_back();
+
+								if (this->Home.checkIfComplete())
+								{
+									cout << "------------------YOU WIN----------------------" << endl;
+								}
 							}
 						}
-						else if ((static_cast<float>(mousePosition.x) > 45 && static_cast<float>(mousePosition.x) < 610) && (static_cast<float>(mousePosition.y) > 1 && static_cast<float>(mousePosition.y) < 120))
-						{
 
-						}
+
+
 						if (!isPositionChanged)
 						{
 							// Reset the card to its original position if no valid move was found
@@ -670,11 +541,15 @@ void Board::Play()
 					window->draw(this->piles[i].cards[j].backImage);
 			}
 		}
-		for (int i = withdrawnDeck.size() - 1, count = 1; i >= 0; i--, count++)
+		for (int i = max(0, static_cast<int>(withdrawnDeck.size()) - 4); i < withdrawnDeck.size(); i++)
 		{
-			window->draw(withdrawnDeck[i].frontImage);
-			if (count == 3)
-				break;
+			if(i >= 0)
+				window->draw(withdrawnDeck[i].frontImage);
+		}
+		for (int i = 0; i < 4; i++)
+		{
+			if(!this->Home.foundationPiles[i].empty())
+				window->draw(this->Home.foundationPiles[i].top().frontImage);
 		}
 		//for (int i = 0; i < selectedCards.size(); i++) 
 		//{
@@ -687,88 +562,7 @@ void Board::Play()
 
 
 
-//{
+void Board::saveBoardState()
+{
 
-	//sf::RenderWindow window(sf::VideoMode(1375, 696), " Tut SFML", sf::Style::Close | sf::Style::Resize);
-	//window.setPosition(Vector2i(-10, 0));
-	//Texture B;
-	//B.loadFromFile("Ace_spades.png");
-
-	//Sprite Card(B);
-	//Card.setPosition(100, 50);
-	//Texture C;
-
-	//Texture A;
-	//A.loadFromFile("background.jpg");
-
-	//Sprite Backg(A);
-	//Backg.setPosition(0, -80);
-	//Font Lato;
-	//Lato.loadFromFile("Lato.ttf");
-
-	//Text NG("NEW GAME", Lato, 50);
-	//NG.setPosition(540, 60);
-	//NG.setFillColor(sf::Color::White);
-	//Text LG("LOAD GAME", Lato, 50);
-	//LG.setPosition(535, 170);
-	//LG.setFillColor(sf::Color::White);
-//	bool isSpriteSelected = false;;
-//	bool deagCard = false;
-//	float max_x = 500;
-//	//--------------
-//	while (window.isOpen())
-//	{
-//		sf::Event evnt;
-//
-//		while (window.pollEvent(evnt))
-//		{
-//			if (evnt.type == sf::Event::Closed)
-//				window.close();
-//
-//			if (evnt.type == sf::Event::MouseButtonPressed)
-//			{
-//				if (evnt.mouseButton.button == sf::Mouse::Left)
-//				{
-//
-//					// Check if the mouse click is inside the sprite
-//					sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-//					if (Card.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)))
-//					{
-//						isSpriteSelected = true;
-//					}
-//				}
-//				else if (evnt.mouseButton.button == sf::Mouse::Right)
-//				{
-//					deagCard = true;
-//				}
-//			}
-//			if (evnt.type == sf::Event::MouseButtonReleased)
-//			{
-//				if (evnt.mouseButton.button == sf::Mouse::Left)
-//				{
-//					isSpriteSelected = false;
-//				}
-//			}
-//		}
-//
-//		if (isSpriteSelected)
-//		{
-//			sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-//			Card.setPosition(static_cast<float>(mousePosition.x) - 50, static_cast<float>(mousePosition.y) - 65);
-//		}
-//		if (deagCard)
-//		{
-//			sf::Vector2f position = Card.getPosition();
-//			position.x += 5;
-//			Card.setPosition(position);
-//			if (position.x >= max_x)
-//				deagCard = false;
-//		}
-//		window.clear();
-//		window.draw(Backg);
-//		window.draw(Card);
-//		window.display();
-//	}
-//
-//	return 0;
-//}
+}

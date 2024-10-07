@@ -20,6 +20,7 @@ class Board
 	sf::RenderWindow* window;
 	sf::Sprite backgroundImage;
 	string mode = "Easy";
+	Board* boardState;
 
 	void shuffle(vector<Card>& Array);
 
@@ -31,5 +32,6 @@ public:
 	void initializeFoundations();
 	bool canPlaceCard(Card* currentCard, Card* targetCard);
 	void Play();
-
+	void addToPile(Card* currentCard, Card* tempCard, vector<Card*>& selectedCards, int sourcePileIndex,int index, bool& isPositionChanged);
+	void saveBoardState();
 };

@@ -6,9 +6,10 @@
 
 class Foundation
 {
+public:
 	vector <stack<Card>> foundationPiles;
 	
-public:
+
 	Foundation();
 	int insertionIndex(Card* currentCard);
 	bool canInsert(Card* currentCard, int index);
