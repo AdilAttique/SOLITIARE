@@ -1,9 +1,13 @@
 #include "Board.h"
 
+
+stack<Board> undoStack;
+stack<Board> redoStack;
 Board::Board()
 {
 	background.loadFromFile("Background.png");
 	this->backgroundImage.setTexture(background);
+	this->score = 0;
 }
 
 void Board::shuffle(vector<Card>& Array)
@@ -201,7 +205,7 @@ void Board::initializeFoundations()
 bool Board::canPlaceCard(Card* currentCard, Card* targetCard)
 {
 	// Handle edge case where the target pile is empty
-	if (!targetCard) {
+	if (!targetCard && targetCard) {
 		// Only Kings (rank 13) can be placed in an empty space
 		return currentCard->rank == 13;
 	}
@@ -223,7 +227,7 @@ bool Board::canPlaceCard(Card* currentCard, Card* targetCard)
 
 
 
-void Board::addToPile(Card* currentCard, Card* tempCard, vector<Card*>& selectedCards, int sourcePileIndex, int index, bool & isPositionChanged)
+void Board::addToPile(Card* currentCard, Card* tempCard, vector<Card*>& selectedCards, int sourcePileIndex, int index, bool & isPositionChanged,bool& changeHappen)
 {
 	if (this->piles[index].cards.empty())
 		tempCard = nullptr;
@@ -248,34 +252,58 @@ void Board::addToPile(Card* currentCard, Card* tempCard, vector<Card*>& selected
 
 		// Remove the moved cards from the source 
 		if (sourcePileIndex >= 0)
+		{
 			this->piles[sourcePileIndex].cards.erase(
 				this->piles[sourcePileIndex].cards.end() - selectedCards.size(),
 				this->piles[sourcePileIndex].cards.end()
 			);
+		}
 		else if (sourcePileIndex == -2)
+		{
 			withdrawnDeck.pop_back();
+		}
 		else if (sourcePileIndex == -3)
 		{
 			for (int i = 0; i < 4; i++)
 			{
 				if (!this->Home.foundationPiles[i].empty())
-					if (this->Home.foundationPiles[i].top().suit == selectedCards[i]->suit)
+					if (this->Home.foundationPiles[i].top().suit == selectedCards[0]->suit)
 						this->Home.foundationPiles[i].pop();
 			}
 		}
 	}
 }
 
-void Board::Play()
+void Board::Play(string gameMode)
 {
-	bool isSpriteSelected = false;;
-	bool deagCard = false;
-	float max_x = 500;
+	sf::SoundBuffer cardPlacingBuffer;
+	cardPlacingBuffer.loadFromFile("Card Plaicng Sound.mp3");
+	sf::Sound cardPlacingSound;
+	cardPlacingSound.setBuffer(cardPlacingBuffer);
+	cardPlacingSound.setPlayingOffset(sf::seconds(1));
+	bool isSpriteSelected = false;
 	Card* currentCard = nullptr;
 	vector<Card*> selectedCards;	
 	sf::Vector2f originalPosition;
 	vector<sf::Vector2f> originalPositions;
 	int sourcePileIndex = -1;
+	window->setFramerateLimit(60);
+	vector<Firework> fireworks;
+	sf::Clock clock;
+	sf::Font font;
+	font.loadFromFile("times.ttf");
+	sf::Text winText;
+	winText.setFont(font);
+	winText.setString("You Win!");
+	winText.setCharacterSize(60); 
+	winText.setFillColor(sf::Color::White);
+	sf::FloatRect textRect = winText.getLocalBounds();
+	winText.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+	winText.setPosition(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
+	int count = 0;
+	sf::Clock endClock;
+	float endTime = 0;
+	bool changeHappen = false;
 	while (window->isOpen())
 	{
 		sf::Event evnt;
@@ -298,14 +326,23 @@ void Board::Play()
 				if (evnt.mouseButton.button == sf::Mouse::Left)
 				{
 					sf::Vector2i mousePosition = sf::Mouse::getPosition(*window);
+					if ((static_cast<float>(mousePosition.x) > 1270 && static_cast<float>(mousePosition.x) < 1330) && (static_cast<float>(mousePosition.y) > 310 && static_cast<float>(mousePosition.y) < 365))
+					{
+						this->undoMove();
+					}
+					else if ((static_cast<float>(mousePosition.x) > 1270 && static_cast<float>(mousePosition.x) < 1330) && (static_cast<float>(mousePosition.y) > 405 && static_cast<float>(mousePosition.y) < 450))
+					{
+						this->redoMove();
+					}
+					
 					for (int i = 0; i < 7; i++)
 					{
 						for (int j = 0; j < this->piles[i].cards.size(); j++)
 						{
-							// Check if the mouse click is inside the sprite
 							
 							if (this->piles[i].cards[j].frontImage.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)))
 							{
+								saveBoardState();
 								if (this->piles[i].cards[j].isFlipped)
 								{
 									currentCard = &this->piles[i].cards[j];
@@ -331,6 +368,7 @@ void Board::Play()
 						{
 							if (this->Home.foundationPiles[i].top().frontImage.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)))
 							{
+								saveBoardState();
 								currentCard = &this->Home.foundationPiles[i].top();
 								originalPosition = this->Home.foundationPiles[i].top().position;
 								isSpriteSelected = true;
@@ -347,7 +385,8 @@ void Board::Play()
 					{
 						if (this->Deck.top().backImage.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)))
 						{
-							if (mode == "Easy")
+							saveBoardState();
+							if (gameMode == "Easy")
 							{
 								this->Deck.top().isFlipped = true;
 								this->withdrawnDeck.push_back(this->Deck.top());
@@ -365,33 +404,37 @@ void Board::Play()
 								this->Deck.pop();
 
 							}
-							else if (mode == "Hard")
+							else if (gameMode == "Hard")
 							{
 								for (int i = 0; i < 3; i++)
 								{
-									this->Deck.top().isFlipped = true;
+									if (!this->Deck.empty())
+									{
+										this->Deck.top().isFlipped = true;
+										this->withdrawnDeck.push_back(this->Deck.top());
+										this->Deck.pop();
+			
+									}
 								}
-									this->withdrawnDeck.push_back(this->Deck.top());
+									
 								for (int z = withdrawnDeck.size() - 1, count = 1; z >= 0; z--, count++)
 								{
 									if (count == 1)
-										this->withdrawnDeck[z].setPosition(this->Deck.top().position.x - (count * 100), this->Deck.top().position.y);
+										this->withdrawnDeck[z].setPosition(1238 - (count * 100), 1);
 									else if (count == 2)
-										this->withdrawnDeck[z].setPosition(this->Deck.top().position.x - (count * 70), this->Deck.top().position.y);
+										this->withdrawnDeck[z].setPosition(1238 - (count * 70), 1);
 									else if (count == 3)
-										this->withdrawnDeck[z].setPosition(this->Deck.top().position.x - (count * 60), this->Deck.top().position.y);
+										this->withdrawnDeck[z].setPosition(1238 - (count * 60), 1);
 									if (count == 3)
 										break;
 								}
-								for (int i = 0; i < 3; i++)
-									this->Deck.pop();
+								
 							}
 						}
 					}
-					else
+					else if ((static_cast<float>(mousePosition.x) > 1240 && static_cast<float>(mousePosition.x) < 1325) && (static_cast<float>(mousePosition.y) > 1 && static_cast<float>(mousePosition.y) < 740))
 					{
-						if ((static_cast<float>(mousePosition.x) > 1240 && static_cast<float>(mousePosition.x) < 1325) && (static_cast<float>(mousePosition.y) > 1 && static_cast<float>(mousePosition.y) < 740))
-						{
+						saveBoardState();
 							while (!withdrawnDeck.empty())
 							{
 								this->Deck.push(withdrawnDeck.front());
@@ -399,7 +442,7 @@ void Board::Play()
 								this->Deck.top().setPosition(1238, 1);
 								withdrawnDeck.pop_front();
 							}
-						}
+							changeHappen = true;
 					}
 					
 
@@ -407,6 +450,7 @@ void Board::Play()
 					{
 						if (withdrawnDeck.back().frontImage.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)))
 						{
+							saveBoardState();
 							currentCard = &withdrawnDeck.back();
 							originalPosition = withdrawnDeck.back().position;
 							isSpriteSelected = true;
@@ -417,12 +461,9 @@ void Board::Play()
 							originalPositions.push_back(withdrawnDeck.back().position);
 							selectedCards.push_back(currentCard);
 						}
+						changeHappen = true;
 					}
 				}
-				//else if (evnt.mouseButton.button == sf::Mouse::Right)
-				//{
-				//	deagCard = true;
-				//}
 			}
 			if (evnt.type == sf::Event::MouseButtonReleased)
 			{
@@ -430,6 +471,7 @@ void Board::Play()
 				{
 					if (isSpriteSelected)
 					{
+						cardPlacingSound.play();
 						isSpriteSelected = false;
 						sf::Vector2i mousePosition = sf::Mouse::getPosition(*window);
 						bool isPositionChanged = false;
@@ -437,34 +479,35 @@ void Board::Play()
 						
 						if ((static_cast<float>(mousePosition.x) > 48 && static_cast<float>(mousePosition.x) < 134) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{	
-							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 0, isPositionChanged);
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 0, isPositionChanged, changeHappen);
 						}
 						else if ((static_cast<float>(mousePosition.x) > 205 && static_cast<float>(mousePosition.x) < 295) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{
-							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 1, isPositionChanged);
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 1, isPositionChanged, changeHappen);
 						}
 						else if ((static_cast<float>(mousePosition.x) > 360 && static_cast<float>(mousePosition.x) < 450) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{
-							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 2, isPositionChanged);
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 2, isPositionChanged, changeHappen);
 						}
 						else if ((static_cast<float>(mousePosition.x) > 520 && static_cast<float>(mousePosition.x) < 605) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{
-							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 3, isPositionChanged);
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 3, isPositionChanged, changeHappen);
 						}
 						else if ((static_cast<float>(mousePosition.x) > 680 && static_cast<float>(mousePosition.x) < 765) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{
-							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 4, isPositionChanged);
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 4, isPositionChanged, changeHappen);
 						}
 						else if ((static_cast<float>(mousePosition.x) > 840 && static_cast<float>(mousePosition.x) < 925) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{
-							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 5, isPositionChanged);
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 5, isPositionChanged, changeHappen);
 						}
 						else if ((static_cast<float>(mousePosition.x) > 1000 && static_cast<float>(mousePosition.x) < 1090) && (static_cast<float>(mousePosition.y) > 142 && static_cast<float>(mousePosition.y) < 740))
 						{
-							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 6, isPositionChanged);
+							this->addToPile(currentCard, tempCard, selectedCards, sourcePileIndex, 6, isPositionChanged, changeHappen);
 						}
 						else if ((static_cast<float>(mousePosition.x) > 45 && static_cast<float>(mousePosition.x) < 610) && (static_cast<float>(mousePosition.y) > 1 && static_cast<float>(mousePosition.y) < 120) && selectedCards.size() == 1)
 						{
+							changeHappen = true;
 							int insertionIndex = this->Home.insertionIndex(selectedCards[0]);
 							if (this->Home.canInsert(selectedCards[0], insertionIndex))
 							{
@@ -481,6 +524,8 @@ void Board::Play()
 
 								if (this->Home.checkIfComplete())
 								{
+									this->userwon = true;
+									endTime = clock.restart().asSeconds();
 									cout << "------------------YOU WIN----------------------" << endl;
 								}
 							}
@@ -490,7 +535,6 @@ void Board::Play()
 
 						if (!isPositionChanged)
 						{
-							// Reset the card to its original position if no valid move was found
 							currentCard->setPosition(originalPosition);
 							for (int i = 0; i < selectedCards.size(); i++)
 							{
@@ -502,7 +546,10 @@ void Board::Play()
 						{
 							this->piles[sourcePileIndex].cards.back().isFlipped = true;
 						}
+						
 					}
+
+					
 				}
 			}
 		}
@@ -512,20 +559,21 @@ void Board::Play()
 			sf::Vector2i mousePosition = sf::Mouse::getPosition(*window);
 			sf::Vector2f basePosition(static_cast<float>(mousePosition.x) - 50, static_cast<float>(mousePosition.y) - 65);
 
-			// Position the other cards below the first card with a fixed offset
 			for (int i = 0; i < selectedCards.size(); i++) 
 			{
-				selectedCards[i]->setPosition(basePosition.x, basePosition.y + (i * 42));  // Adjust the vertical spacing
+				selectedCards[i]->setPosition(basePosition.x, basePosition.y + (i * 42));
 			}
 		}
-		//if (deagCard)
-		//{
-		//	sf::Vector2f position = currentCard->frontImage.getPosition();
-		//	position.x += 5;
-		//	currentCard->setPosition(position);
-		//	if (position.x >= max_x)
-		//		deagCard = false;
-		//}
+		float dt = clock.restart().asSeconds(); 
+
+		if (this->userwon)
+		{
+			for(int i = 0; i < 10; i++)
+				fireworks.push_back(Firework(sf::Vector2f(rand() % WINDOW_WIDTH, rand() % WINDOW_HEIGHT)));
+			userwon = false;  
+			count++;
+		}
+
 
 		window->clear(sf::Color::Cyan);
 		window->draw(this->backgroundImage);
@@ -551,11 +599,21 @@ void Board::Play()
 			if(!this->Home.foundationPiles[i].empty())
 				window->draw(this->Home.foundationPiles[i].top().frontImage);
 		}
-		//for (int i = 0; i < selectedCards.size(); i++) 
-		//{
-		//	window->draw(selectedCards[i]->frontImage);
-		//}
-		//window->draw(TEST);
+		if (count == 1)
+		{
+			for (auto& firework : fireworks) {
+				firework.update(dt);
+			}
+
+			fireworks.erase(std::remove_if(fireworks.begin(), fireworks.end(),
+				[](Firework& f) { return f.isFinished(); }), fireworks.end());
+			for (auto& firework : fireworks) {
+				firework.draw(*window);
+			}
+			window->draw(winText);
+			if (endClock.getElapsedTime().asSeconds() > 7.0)
+				window->close();
+		}
 		window->display();
 	}
 }
@@ -564,5 +622,27 @@ void Board::Play()
 
 void Board::saveBoardState()
 {
+	undoStack.push(*this);
+	while (!redoStack.empty()) redoStack.pop(); 
+}
 
+
+void Board::undoMove()
+{
+	if (!undoStack.empty()) {
+		redoStack.push(*this);
+		*this = undoStack.top(); 
+		undoStack.pop();
+		score -= 5;
+	}
+}
+
+
+void Board::redoMove()
+{
+	if (!redoStack.empty()) {
+		undoStack.push(*this);
+		*this = redoStack.top();
+		redoStack.pop();
+	}
 }

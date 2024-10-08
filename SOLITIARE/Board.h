@@ -8,6 +8,8 @@
 #include "Card.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
+#include <SFML/Audio.hpp>
+#include "Firework.h"
 using namespace std;
 
 class Board
@@ -19,8 +21,8 @@ class Board
 	deque<Card> withdrawnDeck;
 	sf::RenderWindow* window;
 	sf::Sprite backgroundImage;
-	string mode = "Easy";
-	Board* boardState;
+	bool userwon;
+	int score;
 
 	void shuffle(vector<Card>& Array);
 
@@ -31,7 +33,9 @@ public:
 	void initliazePiles();
 	void initializeFoundations();
 	bool canPlaceCard(Card* currentCard, Card* targetCard);
-	void Play();
-	void addToPile(Card* currentCard, Card* tempCard, vector<Card*>& selectedCards, int sourcePileIndex,int index, bool& isPositionChanged);
+	void Play(string gameMode);
+	void addToPile(Card* currentCard, Card* tempCard, vector<Card*>& selectedCards, int sourcePileIndex,int index, bool& isPositionChanged, bool &changeHappen);
 	void saveBoardState();
+	void undoMove();
+	void redoMove();
 };
