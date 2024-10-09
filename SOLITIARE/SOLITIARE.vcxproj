@@ -133,21 +133,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Board.cpp" />
-    <ClCompile Include="Card.cpp" />
-    <ClCompile Include="Foundation.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="MyStack.cpp" />
-    <ClCompile Include="Solitare.cpp" />
+    <ClCompile Include="BSCS23196_Board.cpp" />
+    <ClCompile Include="BSCS23196_Card.cpp" />
+    <ClCompile Include="BSCS23196_Foundation.cpp" />
+    <ClCompile Include="BSCS23196_main.cpp" />
+    <ClCompile Include="BSCS23196_MyStack.cpp" />
+    <ClCompile Include="BSCS23196_Solitare.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Board.h" />
-    <ClInclude Include="Card.h" />
-    <ClInclude Include="Firework.h" />
-    <ClInclude Include="Foundation.h" />
-    <ClInclude Include="MyStack.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="Solitare.h" />
+    <ClInclude Include="BSCS23196_Board.h" />
+    <ClInclude Include="BSCS23196_Card.h" />
+    <ClInclude Include="BSCS23196_Firework.h" />
+    <ClInclude Include="BSCS23196_Foundation.h" />
+    <ClInclude Include="BSCS23196_MyStack.h" />
+    <ClInclude Include="BSCS23196_Solitare.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,45 +15,42 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Board.cpp">
+    <ClCompile Include="BSCS23196_Board.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Card.cpp">
+    <ClCompile Include="BSCS23196_Card.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MyStack.cpp">
+    <ClCompile Include="BSCS23196_MyStack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Solitare.cpp">
+    <ClCompile Include="BSCS23196_Solitare.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="BSCS23196_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Foundation.cpp">
+    <ClCompile Include="BSCS23196_Foundation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MyStack.h">
+    <ClInclude Include="BSCS23196_MyStack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Card.h">
+    <ClInclude Include="BSCS23196_Card.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Board.h">
+    <ClInclude Include="BSCS23196_Board.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Solitare.h">
+    <ClInclude Include="BSCS23196_Solitare.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Foundation.h">
+    <ClInclude Include="BSCS23196_Foundation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Firework.h">
+    <ClInclude Include="BSCS23196_Firework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

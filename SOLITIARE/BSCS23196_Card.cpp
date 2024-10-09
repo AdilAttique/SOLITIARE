@@ -1,4 +1,4 @@
-#include "Card.h"
+#include "BSCS23196_Card.h"
 
 sf::Texture Card::backImageTexture;
 

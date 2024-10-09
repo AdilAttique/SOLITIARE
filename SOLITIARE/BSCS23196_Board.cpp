@@ -1,4 +1,4 @@
-#include "Board.h"
+#include "BSCS23196_Board.h"
 
 
 stack<Board> undoStack;

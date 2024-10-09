@@ -1,4 +1,4 @@
-#include "Solitare.h"
+#include "BSCS23196_Solitare.h"
 
 //if (evnt.mouseButton.button == sf::Mouse::Right)
 //{

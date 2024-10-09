@@ -1,5 +1,5 @@
 #pragma once
-#include "Board.h"
+#include "BSCS23196_Board.h"
 #include <iostream>
 #include <SFML/Audio.hpp>
 using namespace std;

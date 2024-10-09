@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <stack>
-#include "Card.h">
+#include "BSCS23196_Card.h">
 #include<vector>
 
 class Foundation

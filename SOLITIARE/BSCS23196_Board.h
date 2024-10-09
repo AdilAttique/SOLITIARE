@@ -1,15 +1,15 @@
 #pragma once
 #include <iostream>
 #include <vector>
-#include "MyStack.h"
-#include "Foundation.h"
+#include "BSCS23196_MyStack.h"
+#include "BSCS23196_Foundation.h"
 #include <stack>
 #include <deque>
-#include "Card.h"
+#include "BSCS23196_Card.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Audio.hpp>
-#include "Firework.h"
+#include "BSCS23196_Firework.h"
 using namespace std;
 
 class Board
