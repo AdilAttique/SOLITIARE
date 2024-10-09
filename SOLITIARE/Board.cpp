@@ -8,6 +8,12 @@ Board::Board()
 	background.loadFromFile("Background.png");
 	this->backgroundImage.setTexture(background);
 	this->score = 0;
+	this->scoreText.setCharacterSize(40);
+	this->scoreText.setFillColor(sf::Color::White);
+	this->scoreText.setPosition(1170, 515);
+	this->TimeText.setCharacterSize(40);
+	this->TimeText.setFillColor(sf::Color::White);
+	this->TimeText.setPosition(1170, 615);
 }
 
 void Board::shuffle(vector<Card>& Array)
@@ -82,67 +88,6 @@ void Board::intiliazeDeck()
 	this->shuffle(temp);
 	this->shuffle(temp);
 
-	// 
-	/*for (int i = 0; i < 52; i++)
-	{
-		temp[i]->frontImage.setScale(0.03, 0.03);
-		temp[i]->frontImage.setPosition(10, 20);
-		cout << temp[i]->frontImage.getPosition().x << endl;
-		this->Deck.push(temp[i]);
-	}*/
-	//temp[0] = new Club("1.png", backImage, 1, 'C');
-	//temp[1] = new Club("5.png", backImage, 13, 'C');
-	//temp[2] = new Club("9.png", backImage, 12, 'C');
-	//temp[3] = new Club("13.png", backImage, 11, 'C');
-	//temp[4] = new Club("17.png", backImage, 10, 'C');
-	//temp[5] = new Club("21.png", backImage, 9, 'C');
-	//temp[6] = new Club("25.png", backImage, 8, 'C');
-	//temp[7] = new Club("29.png", backImage, 7, 'C');
-	//temp[8] = new Club("33.png", backImage, 6, 'C');
-	//temp[9] = new Club("37.png", backImage, 5, 'C');
-	//temp[10] = new Club("41.png", backImage, 4, 'C');
-	//temp[11] = new Club("45.png", backImage, 3, 'C');
-	//temp[12] = new Club("49.png", backImage, 2, 'C');
-	//temp[13] = new Spade("2.png", backImage, 1, 'S');
-	//temp[14] = new Spade("6.png", backImage, 13, 'S');
-	//temp[15] = new Spade("10.png", backImage, 12, 'S');
-	//temp[16] = new Spade("14.png", backImage, 11, 'S');
-	//temp[17] = new Spade("18.png", backImage, 10, 'S');
-	//temp[18] = new Spade("22.png", backImage, 9, 'S');
-	//temp[19] = new Spade("26.png", backImage, 8, 'S');
-	//temp[20] = new Spade("30.png", backImage, 7, 'S');
-	//temp[21] = new Spade("34.png", backImage, 6, 'S');
-	//temp[22] = new Spade("38.png", backImage, 5, 'S');
-	//temp[23] = new Spade("42.png", backImage, 4, 'S');
-	//temp[24] = new Spade("46.png", backImage, 3, 'S');
-	//temp[25] = new Spade("50.png", backImage, 2, 'S');
-	//temp[26] = new Heart("3.png", backImage, 1, 'H');
-	//temp[27] = new Heart("7.png", backImage, 13, 'H');
-	//temp[28] = new Heart("11.png", backImage, 12, 'H');
-	//temp[29] = new Heart("15.png", backImage, 11, 'H');
-	//temp[30] = new Heart("19.png", backImage, 10, 'H');
-	//temp[31] = new Heart("23.png", backImage, 9, 'H');
-	//temp[32] = new Heart("27.png", backImage, 8, 'H');
-	//temp[33] = new Heart("31.png", backImage, 7, 'H');
-	//temp[34] = new Heart("35.png", backImage, 6, 'H');
-	//temp[35] = new Heart("39.png", backImage, 5, 'H');
-	//temp[36] = new Heart("43.png", backImage, 4, 'H');
-	//temp[37] = new Heart("47.png", backImage, 3, 'H');
-	//temp[38] = new Heart("51.png", backImage, 2, 'H');
-	//temp[39] = new Diamond("4.png", backImage, 1, 'D');
-	//temp[40] = new Diamond("8.png", backImage, 13, 'D');
-	//temp[41] = new Diamond("12.png", backImage, 12, 'D');
-	//temp[42] = new Diamond("16.png", backImage, 11, 'D');
-	//temp[43] = new Diamond("20.png", backImage, 10, 'D');
-	//temp[44] = new Diamond("24.png", backImage, 9, 'D');
-	//temp[45] = new Diamond("28.png", backImage, 8, 'D');
-	//temp[46] = new Diamond("32.png", backImage, 7, 'D');
-	//temp[47] = new Diamond("36.png", backImage, 6, 'D');
-	//temp[48] = new Diamond("40.png", backImage, 5, 'D');
-	//temp[49] = new Diamond("44.png", backImage, 4, 'D');
-	//temp[50] = new Diamond("48.png", backImage, 3, 'D');
-	//temp[51] = new Diamond("52.png", backImage, 2, 'D');
-
 
 	for (int i = 0; i < 52; i++)
 	{
@@ -204,24 +149,18 @@ void Board::initializeFoundations()
 
 bool Board::canPlaceCard(Card* currentCard, Card* targetCard)
 {
-	// Handle edge case where the target pile is empty
-	if (!targetCard && targetCard) {
-		// Only Kings (rank 13) can be placed in an empty space
+	if (!targetCard) {
 		return currentCard->rank == 13;
 	}
 	cout << "Current Card Details: " << currentCard->suit << "  " << currentCard->rank << endl;
 	cout << "Target Card Details: " << targetCard->suit << "  " << targetCard->rank << endl;
-	// Color checking: Hearts ('H') and Diamonds ('D') are red; Clubs ('C') and Spades ('S') are black.
 	bool currentCardIsRed = (currentCard->suit == 'H' || currentCard->suit == 'D');
 	bool targetCardIsRed = (targetCard->suit == 'H' || targetCard->suit == 'D');
 
-	// Cards must be of different colors
 	bool differentColors = (currentCardIsRed != targetCardIsRed);
 
-	// The current card's rank must be exactly one less than the target card's rank
 	bool correctRank = (currentCard->rank == targetCard->rank - 1);
 
-	// Return true only if both the color and rank rules are satisfied
 	return differentColors && correctRank;
 }
 
@@ -246,21 +185,22 @@ void Board::addToPile(Card* currentCard, Card* tempCard, vector<Card*>& selected
 
 		for (int i = 0; i < selectedCards.size(); i++)
 		{
-			selectedCards[i]->setPosition(tempPosition.x, tempPosition.y + (i * 42));  // Adjust spacing
+			selectedCards[i]->setPosition(tempPosition.x, tempPosition.y + (i * 42)); 
 			this->piles[index].cards.push_back(*selectedCards[i]);
 		}
 
-		// Remove the moved cards from the source 
 		if (sourcePileIndex >= 0)
 		{
 			this->piles[sourcePileIndex].cards.erase(
 				this->piles[sourcePileIndex].cards.end() - selectedCards.size(),
 				this->piles[sourcePileIndex].cards.end()
 			);
+			this->score += 10;
 		}
 		else if (sourcePileIndex == -2)
 		{
 			withdrawnDeck.pop_back();
+			this->score += 5;
 		}
 		else if (sourcePileIndex == -3)
 		{
@@ -270,10 +210,12 @@ void Board::addToPile(Card* currentCard, Card* tempCard, vector<Card*>& selected
 					if (this->Home.foundationPiles[i].top().suit == selectedCards[0]->suit)
 						this->Home.foundationPiles[i].pop();
 			}
+			this->score += 10;
 		}
 	}
 }
-
+#include <iomanip>
+#include <sstream>
 void Board::Play(string gameMode)
 {
 	sf::SoundBuffer cardPlacingBuffer;
@@ -292,6 +234,8 @@ void Board::Play(string gameMode)
 	sf::Clock clock;
 	sf::Font font;
 	font.loadFromFile("times.ttf");
+	this->scoreText.setFont(font);
+	this->TimeText.setFont(font);
 	sf::Text winText;
 	winText.setFont(font);
 	winText.setString("You Win!");
@@ -304,6 +248,10 @@ void Board::Play(string gameMode)
 	sf::Clock endClock;
 	float endTime = 0;
 	bool changeHappen = false;
+	string scoreString = "Score: 0";
+	sf::Clock Time;
+	Time.restart().asSeconds();
+	sf::Time timeElapsed;
 	while (window->isOpen())
 	{
 		sf::Event evnt;
@@ -511,6 +459,7 @@ void Board::Play(string gameMode)
 							int insertionIndex = this->Home.insertionIndex(selectedCards[0]);
 							if (this->Home.canInsert(selectedCards[0], insertionIndex))
 							{
+								this->score += 10;
 								this->Home.insert(selectedCards[0], insertionIndex);
 								isPositionChanged = true;
 
@@ -573,8 +522,21 @@ void Board::Play(string gameMode)
 			userwon = false;  
 			count++;
 		}
+		timeElapsed = Time.getElapsedTime();
+		int totalSeconds = timeElapsed.asSeconds();
+		// Convert seconds to minutes and seconds
+		int minutes = totalSeconds / 60;
+		int seconds = totalSeconds % 60;
 
+		// Format the time as "MM:SS"
+		std::stringstream timeStream;
+		timeStream << "Time: " << setw(2) << setfill('0') << minutes << ":"
+			<< setw(2) << setfill('0') << seconds;
 
+		// Set the formatted string to the time display
+		TimeText.setString(timeStream.str());
+		scoreString = "Score: " + to_string(this->score);
+		this->scoreText.setString(scoreString);
 		window->clear(sf::Color::Cyan);
 		window->draw(this->backgroundImage);
 		if(!this->Deck.empty())
@@ -614,6 +576,8 @@ void Board::Play(string gameMode)
 			if (endClock.getElapsedTime().asSeconds() > 7.0)
 				window->close();
 		}
+		window->draw(this->scoreText);
+		window->draw(this->TimeText);
 		window->display();
 	}
 }

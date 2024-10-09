@@ -8,7 +8,6 @@ Card::Card(string filepath, string backFilePath, int Rank, char Suit)
 	frontImageTexture.loadFromFile(filepath);
 	this->frontImage.setTexture(frontImageTexture);
 	this->frontImage.setScale(0.11, 0.11);
-	//backImageTexture.loadFromFile(backFilePath);
 	this->backImage.setTexture(backImageTexture);
 	this->backImage.setScale(0.11, 0.11);
 	this->backImage.setPosition(this->position);

@@ -23,6 +23,8 @@ class Board
 	sf::Sprite backgroundImage;
 	bool userwon;
 	int score;
+	sf::Text scoreText;
+	sf::Text TimeText;
 
 	void shuffle(vector<Card>& Array);
 
